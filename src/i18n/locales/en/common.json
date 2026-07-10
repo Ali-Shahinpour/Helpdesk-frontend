@@ -1,0 +1,60 @@
+{
+  "app": {
+    "tagline": "Help Desk"
+  },
+  "sidebar": {
+    "nav": {
+      "dashboard": "Dashboard",
+      "tickets": "Tickets"
+    },
+    "adminSection": "Admin",
+    "adminNav": {
+      "users": "Users",
+      "departments": "Departments"
+    },
+    "loggedInAs": "Logged in as"
+  },
+  "header": {
+    "searchPlaceholder": "Search tickets, users…",
+    "newTicket": "New Ticket",
+    "profile": "Profile",
+    "signOut": "Sign out",
+    "toggleSidebar": "Toggle sidebar",
+    "notifications": "Notifications",
+    "language": "Language"
+  },
+  "dashboard": {
+    "eyebrow": "Dashboard",
+    "welcome": "Welcome back, {{name}} 👋",
+    "subtitle": "Here's what's happening across your help desk today.",
+    "cards": {
+      "openTickets": "Open tickets",
+      "closedTickets": "Closed tickets",
+      "myTickets": "My tickets",
+      "assignedToMe": "Assigned to me",
+      "total": "Total"
+    },
+    "recentTickets": {
+      "title": "Recent tickets",
+      "viewAll": "View all"
+    },
+    "recentActivity": {
+      "title": "Recent activity",
+      "empty": "No activity yet.",
+      "someone": "Someone"
+    },
+    "activityTypes": {
+      "created": "created",
+      "assigned": "assigned",
+      "status_changed": "changed status",
+      "commented": "commented",
+      "attachment_added": "added an attachment",
+      "closed": "closed",
+      "reopened": "reopened"
+    }
+  },
+  "language": {
+    "en": "English",
+    "fa": "Persian"
+  }
+}

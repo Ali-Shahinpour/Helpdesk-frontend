@@ -1,0 +1,60 @@
+{
+  "app": {
+    "tagline": "پشتیبانی"
+  },
+  "sidebar": {
+    "nav": {
+      "dashboard": "داشبورد",
+      "tickets": "تیکت‌ها"
+    },
+    "adminSection": "مدیریت",
+    "adminNav": {
+      "users": "کاربران",
+      "departments": "بخش‌ها"
+    },
+    "loggedInAs": "وارد شده به‌عنوان"
+  },
+  "header": {
+    "searchPlaceholder": "جستجوی تیکت‌ها، کاربران…",
+    "newTicket": "تیکت جدید",
+    "profile": "پروفایل",
+    "signOut": "خروج",
+    "toggleSidebar": "نمایش/مخفی‌کردن نوار کناری",
+    "notifications": "اعلان‌ها",
+    "language": "زبان"
+  },
+  "dashboard": {
+    "eyebrow": "داشبورد",
+    "welcome": "خوش آمدید، {{name}} 👋",
+    "subtitle": "این خلاصه‌ای از آخرین اتفاقات میز پشتیبانی شماست.",
+    "cards": {
+      "openTickets": "تیکت‌های باز",
+      "closedTickets": "تیکت‌های بسته‌شده",
+      "myTickets": "تیکت‌های من",
+      "assignedToMe": "محول‌شده به من",
+      "total": "مجموع"
+    },
+    "recentTickets": {
+      "title": "تیکت‌های اخیر",
+      "viewAll": "مشاهده همه"
+    },
+    "recentActivity": {
+      "title": "فعالیت‌های اخیر",
+      "empty": "هنوز فعالیتی ثبت نشده است.",
+      "someone": "شخصی"
+    },
+    "activityTypes": {
+      "created": "ایجاد کرد",
+      "assigned": "واگذار کرد",
+      "status_changed": "وضعیت را تغییر داد",
+      "commented": "نظر داد",
+      "attachment_added": "پیوست اضافه کرد",
+      "closed": "بست",
+      "reopened": "دوباره باز کرد"
+    }
+  },
+  "language": {
+    "en": "انگلیسی",
+    "fa": "فارسی"
+  }
+}

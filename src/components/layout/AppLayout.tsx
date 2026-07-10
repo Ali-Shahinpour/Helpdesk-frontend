@@ -1,4 +1,5 @@
 import { Link, NavLink, Outlet, useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { LayoutDashboard, Ticket, Users, Building2, User, LogOut, Plus, Menu, Bell, Search } from "lucide-react";
 import { useAppDispatch, useAppSelector, clearAuth, toggleSidebar } from "@/store";
 import { api } from "@/lib/api";
@@ -7,23 +8,25 @@ import { Input } from "@/components/ui/input";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
+import { LanguageSwitcher } from "@/components/common/LanguageSwitcher";
 import { cn } from "@/lib/utils";
 
-const nav = [
-  { to: "/", label: "Dashboard", icon: LayoutDashboard, end: true },
-  { to: "/tickets", label: "Tickets", icon: Ticket },
-];
-const adminNav = [
-  { to: "/admin/users", label: "Users", icon: Users },
-  { to: "/admin/departments", label: "Departments", icon: Building2 },
-];
-
 export function AppLayout() {
+  const { t } = useTranslation();
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const { user } = useAppSelector(s => s.auth);
   const { sidebarCollapsed } = useAppSelector(s => s.ui);
   const isAdmin = user?.role === "Admin" || user?.role === "Manager";
+
+  const nav = [
+    { to: "/", label: t("sidebar.nav.dashboard"), icon: LayoutDashboard, end: true },
+    { to: "/tickets", label: t("sidebar.nav.tickets"), icon: Ticket },
+  ];
+  const adminNav = [
+    { to: "/admin/users", label: t("sidebar.adminNav.users"), icon: Users },
+    { to: "/admin/departments", label: t("sidebar.adminNav.departments"), icon: Building2 },
+  ];
 
   async function handleLogout() {
     await api.logout();
@@ -36,10 +39,10 @@ export function AppLayout() {
   return (
     <div className="flex min-h-screen bg-background">
       {/* Sidebar */}
-      <aside className={cn("hidden md:flex flex-col bg-sidebar text-sidebar-foreground border-r border-sidebar-border transition-all", sidebarCollapsed ? "w-16" : "w-64")}>
+      <aside className={cn("hidden md:flex flex-col bg-sidebar text-sidebar-foreground border-e border-sidebar-border transition-all", sidebarCollapsed ? "w-16" : "w-64")}>
         <div className="flex items-center gap-2 px-4 py-5 border-b border-sidebar-border">
           <div className="h-9 w-9 rounded-lg bg-gradient-primary grid place-items-center font-display font-bold text-primary-foreground shadow-glow">H</div>
-          {!sidebarCollapsed && <div><div className="font-display font-bold text-lg leading-none">Helix</div><div className="text-[10px] uppercase tracking-widest text-sidebar-foreground/60 mt-1">Help Desk</div></div>}
+          {!sidebarCollapsed && <div><div className="font-display font-bold text-lg leading-none">Helix</div><div className="text-[10px] uppercase tracking-widest text-sidebar-foreground/60 mt-1">{t("app.tagline")}</div></div>}
         </div>
         <nav className="flex-1 px-2 py-4 space-y-1">
           {nav.map(item => (
@@ -52,7 +55,7 @@ export function AppLayout() {
           ))}
           {isAdmin && (
             <>
-              {!sidebarCollapsed && <div className="px-3 pt-5 pb-1 text-[10px] uppercase tracking-widest text-sidebar-foreground/40">Admin</div>}
+              {!sidebarCollapsed && <div className="px-3 pt-5 pb-1 text-[10px] uppercase tracking-widest text-sidebar-foreground/40">{t("sidebar.adminSection")}</div>}
               {adminNav.map(item => (
                 <NavLink key={item.to} to={item.to}
                   className={({ isActive }) => cn("flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors",
@@ -67,7 +70,7 @@ export function AppLayout() {
         <div className="p-3 border-t border-sidebar-border">
           {!sidebarCollapsed ? (
             <div className="rounded-lg bg-sidebar-accent p-3">
-              <div className="text-xs text-sidebar-foreground/60">Logged in as</div>
+              <div className="text-xs text-sidebar-foreground/60">{t("sidebar.loggedInAs")}</div>
               <div className="text-sm font-medium truncate">{user?.fullName}</div>
               <Badge variant="secondary" className="mt-2 text-[10px]">{user?.role}</Badge>
             </div>
@@ -80,17 +83,18 @@ export function AppLayout() {
       <div className="flex-1 flex flex-col min-w-0">
         {/* Topbar */}
         <header className="h-16 border-b bg-card/60 backdrop-blur flex items-center gap-3 px-4 md:px-6 sticky top-0 z-30">
-          <Button variant="ghost" size="icon" onClick={() => dispatch(toggleSidebar())} className="hidden md:inline-flex"><Menu className="h-4 w-4" /></Button>
+          <Button variant="ghost" size="icon" onClick={() => dispatch(toggleSidebar())} aria-label={t("header.toggleSidebar")} className="hidden md:inline-flex"><Menu className="h-4 w-4" /></Button>
           <div className="flex-1 max-w-md relative">
-            <Search className="h-4 w-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-            <Input placeholder="Search tickets, users…" className="pl-9 bg-background/60" />
+            <Search className="h-4 w-4 absolute start-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+            <Input placeholder={t("header.searchPlaceholder")} className="ps-9 bg-background/60" />
           </div>
           <Button asChild className="bg-gradient-primary text-primary-foreground shadow-glow hover:opacity-90">
-            <Link to="/tickets/new"><Plus className="h-4 w-4 mr-1" />New Ticket</Link>
+            <Link to="/tickets/new"><Plus className="h-4 w-4 me-1" />{t("header.newTicket")}</Link>
           </Button>
-          <Button variant="ghost" size="icon" className="relative">
+          <LanguageSwitcher />
+          <Button variant="ghost" size="icon" className="relative" aria-label={t("header.notifications")}>
             <Bell className="h-4 w-4" />
-            <span className="absolute top-2 right-2 h-2 w-2 rounded-full bg-accent animate-pulse" />
+            <span className="absolute top-2 end-2 h-2 w-2 rounded-full bg-accent animate-pulse" />
           </Button>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -99,9 +103,9 @@ export function AppLayout() {
             <DropdownMenuContent align="end" className="w-56">
               <DropdownMenuLabel><div className="font-medium">{user?.fullName}</div><div className="text-xs text-muted-foreground font-normal">{user?.email}</div></DropdownMenuLabel>
               <DropdownMenuSeparator />
-              <DropdownMenuItem asChild><Link to="/profile"><User className="h-4 w-4 mr-2" />Profile</Link></DropdownMenuItem>
+              <DropdownMenuItem asChild><Link to="/profile"><User className="h-4 w-4 me-2" />{t("header.profile")}</Link></DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={handleLogout} className="text-destructive"><LogOut className="h-4 w-4 mr-2" />Sign out</DropdownMenuItem>
+              <DropdownMenuItem onClick={handleLogout} className="text-destructive"><LogOut className="h-4 w-4 me-2" />{t("header.signOut")}</DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </header>

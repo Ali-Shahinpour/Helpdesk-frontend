@@ -164,6 +164,23 @@ body {
 }
 h1, h2, h3, h4 { font-family: var(--font-display); letter-spacing: -0.02em; }
 
+/* Persian (RTL) typography: switch to Vazirmatn and relax the tightened
+   Latin letter-spacing, which doesn't apply to Perso-Arabic script. */
+html[lang="fa"] body {
+  font-family: "Vazirmatn", var(--font-sans);
+}
+html[lang="fa"] h1,
+html[lang="fa"] h2,
+html[lang="fa"] h3,
+html[lang="fa"] h4 {
+  font-family: "Vazirmatn", var(--font-display);
+  letter-spacing: normal;
+}
+html[dir="rtl"] .font-mono {
+  direction: ltr;
+  unicode-bidi: isolate;
+}
+
 @utility bg-gradient-primary { background: var(--gradient-primary); }
 @utility bg-gradient-accent { background: var(--gradient-accent); }
 @utility bg-gradient-surface { background: var(--gradient-surface); }
