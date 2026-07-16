@@ -2,8 +2,9 @@
 // client pointing at the ASP.NET Core API in /backend — same function signatures.
 import type {
   User, Role, Department, Ticket, TicketStatus, TicketPriority,
-  TicketCategory, Comment, Attachment, ActivityEvent, AuthResponse,
+  TicketCategory, Comment, Attachment, ActivityEvent, AuthResponse, Notification,
 } from "@/types";
+import { emitLocal } from "./signalr";
 
 const K = {
   users: "hd_users",
@@ -12,6 +13,7 @@ const K = {
   comments: "hd_comments",
   attachments: "hd_attachments",
   activity: "hd_activity",
+  notifications: "hd_notifications",
   session: "hd_session",
   passwords: "hd_passwords",
   resetTokens: "hd_reset_tokens",
@@ -52,6 +54,7 @@ function seed() {
   write(K.comments, []);
   write(K.attachments, []);
   write(K.activity, tickets.map<ActivityEvent>(t => ({ id: uid(), ticketId: t.id, actorId: t.customerId, type: "created", createdAt: t.createdAt })));
+  write(K.notifications, []);
   write(K.passwords, passwords);
   localStorage.setItem(K.seeded, "1");
 }
@@ -204,6 +207,9 @@ export const api = {
     }
     if (patch.assignedAgentId !== undefined && patch.assignedAgentId !== prev.assignedAgentId) {
       addActivity(id, actorId, "assigned", { to: patch.assignedAgentId });
+      if (patch.assignedAgentId) {
+        addNotification(patch.assignedAgentId, "TicketAssigned", `Ticket ${next.number} assigned to you`, next.subject, id);
+      }
     }
     all[i] = next; write(K.tickets, all); return next;
   },
@@ -222,6 +228,15 @@ export const api = {
     const c: Comment = { id: uid(), createdAt: now(), ...input };
     const all = read<Comment[]>(K.comments, []); all.push(c); write(K.comments, all);
     addActivity(input.ticketId, input.authorId, "commented", { internal: input.isInternal });
+    if (!input.isInternal) {
+      const t = read<Ticket[]>(K.tickets, []).find(x => x.id === input.ticketId);
+      if (t) {
+        const targets = Array.from(new Set([t.customerId, t.assignedAgentId].filter((x): x is string => !!x && x !== input.authorId)));
+        for (const userId of targets) {
+          addNotification(userId, "CommentAdded", `New comment on ${t.number}`, c.body.slice(0, 120), t.id);
+        }
+      }
+    }
     return c;
   },
 
@@ -265,7 +280,56 @@ export const api = {
       byPriority: groupBy(visible, t => t.priority),
     };
   },
+
+  // ----- Notifications -----
+  async listNotifications(unreadOnly = false): Promise<Notification[]> {
+    await delay(150);
+    const userId = currentUserId();
+    let list = read<Notification[]>(K.notifications, []).filter(n => n.userId === userId);
+    if (unreadOnly) list = list.filter(n => !n.isRead);
+    return list.sort((a, b) => b.createdAt.localeCompare(a.createdAt)).slice(0, 100);
+  },
+  async getUnreadNotificationCount(): Promise<number> {
+    await delay(80);
+    const userId = currentUserId();
+    return read<Notification[]>(K.notifications, []).filter(n => n.userId === userId && !n.isRead).length;
+  },
+  async markNotificationRead(id: string): Promise<void> {
+    await delay(80);
+    const all = read<Notification[]>(K.notifications, []);
+    const i = all.findIndex(n => n.id === id);
+    if (i < 0) return;
+    all[i] = { ...all[i], isRead: true };
+    write(K.notifications, all);
+  },
+  async markAllNotificationsRead(): Promise<void> {
+    await delay();
+    const userId = currentUserId();
+    write(K.notifications, read<Notification[]>(K.notifications, []).map(n => (n.userId === userId ? { ...n, isRead: true } : n)));
+  },
+  async deleteNotification(id: string): Promise<void> {
+    await delay(80);
+    write(K.notifications, read<Notification[]>(K.notifications, []).filter(n => n.id !== id));
+  },
+  async deleteAllReadNotifications(): Promise<void> {
+    await delay();
+    const userId = currentUserId();
+    write(K.notifications, read<Notification[]>(K.notifications, []).filter(n => !(n.userId === userId && n.isRead)));
+  },
 };
+
+function currentUserId(): string | undefined {
+  return read<AuthResponse | null>(K.session, null)?.user.id;
+}
+
+function addNotification(userId: string, type: string, title: string, body: string | undefined, ticketId?: string): Notification {
+  const n: Notification = { id: uid(), userId, type, title, body, ticketId, isRead: false, createdAt: now() };
+  const all = read<Notification[]>(K.notifications, []);
+  all.push(n);
+  write(K.notifications, all);
+  emitLocal("NotificationReceived", n);
+  return n;
+}
 
 function addActivity(ticketId: string, actorId: string, type: ActivityEvent["type"], meta?: Record<string, unknown>) {
   const all = read<ActivityEvent[]>(K.activity, []);

@@ -1,6 +1,7 @@
 import { configureStore, createSlice, type PayloadAction } from "@reduxjs/toolkit";
 import { TypedUseSelectorHook, useDispatch, useSelector } from "react-redux";
 import type { User } from "@/types";
+import { LANGUAGE_STORAGE_KEY, isSupportedLanguage, type SupportedLanguage } from "@/lib/i18n/config";
 
 interface AuthState {
   user: User | null;
@@ -31,18 +32,29 @@ const authSlice = createSlice({
   },
 });
 
-interface UiState { sidebarCollapsed: boolean; theme: "light" | "dark"; }
+export type AppLanguage = SupportedLanguage;
+
+function readInitialLanguage(): AppLanguage {
+  try {
+    const stored = typeof window !== "undefined" ? localStorage.getItem(LANGUAGE_STORAGE_KEY) : null;
+    if (isSupportedLanguage(stored)) return stored;
+  } catch {}
+  return "en";
+}
+
+interface UiState { sidebarCollapsed: boolean; theme: "light" | "dark"; language: AppLanguage; }
 const uiSlice = createSlice({
   name: "ui",
-  initialState: { sidebarCollapsed: false, theme: "light" } as UiState,
+  initialState: { sidebarCollapsed: false, theme: "light", language: readInitialLanguage() } as UiState,
   reducers: {
     toggleSidebar(s) { s.sidebarCollapsed = !s.sidebarCollapsed; },
     setTheme(s, a: PayloadAction<"light" | "dark">) { s.theme = a.payload; },
+    setLanguage(s, a: PayloadAction<AppLanguage>) { s.language = a.payload; },
   },
 });
 
 export const { setAuth, clearAuth, updateProfile } = authSlice.actions;
-export const { toggleSidebar, setTheme } = uiSlice.actions;
+export const { toggleSidebar, setTheme, setLanguage } = uiSlice.actions;
 
 export const store = configureStore({
   reducer: { auth: authSlice.reducer, ui: uiSlice.reducer },

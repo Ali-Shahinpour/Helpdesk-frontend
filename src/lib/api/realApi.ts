@@ -3,7 +3,7 @@ import { http } from "./client";
 import { tokenStore } from "./tokenStore";
 import type {
   User, Department, Ticket, TicketStatus, TicketPriority,
-  TicketCategory, Comment, Attachment, ActivityEvent, AuthResponse, Role,
+  TicketCategory, Comment, Attachment, ActivityEvent, AuthResponse, Role, Notification,
 } from "@/types";
 
 async function unwrap<T>(p: Promise<{ data: T }>): Promise<T> {
@@ -112,4 +112,16 @@ export const realApi = {
       byStatus: Record<string, number>; byPriority: Record<string, number>;
     }>(http.get("/dashboard/stats"));
   },
+
+  // ----- Notifications -----
+  async listNotifications(unreadOnly = false) {
+    return unwrap<Notification[]>(http.get("/notifications", { params: { unreadOnly } }));
+  },
+  async getUnreadNotificationCount() {
+    return unwrap<number>(http.get("/notifications/unread-count"));
+  },
+  async markNotificationRead(id: string) { await http.post(`/notifications/${id}/read`); },
+  async markAllNotificationsRead() { await http.post("/notifications/read-all"); },
+  async deleteNotification(id: string) { await http.delete(`/notifications/${id}`); },
+  async deleteAllReadNotifications() { await http.delete("/notifications/read"); },
 };

@@ -5,6 +5,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "sonner";
 import { store } from "@/store";
+import "@/lib/i18n/config";
 import { AuthGate } from "@/features/auth/AuthGate";
 import { AppLayout } from "@/components/layout/AppLayout";
 import LoginPage from "@/pages/auth/LoginPage";
@@ -18,11 +19,6 @@ import TicketDetailPage from "@/pages/tickets/TicketDetailPage";
 import UsersPage from "@/pages/admin/UsersPage";
 import DepartmentsPage from "@/pages/admin/DepartmentsPage";
 import ProfilePage from "@/pages/ProfilePage";
-import "@/i18n/config";
-import "@fontsource/vazirmatn/400.css";
-import "@fontsource/vazirmatn/500.css";
-import "@fontsource/vazirmatn/600.css";
-import "@fontsource/vazirmatn/700.css";
 import "./styles.css";
 
 const queryClient = new QueryClient({

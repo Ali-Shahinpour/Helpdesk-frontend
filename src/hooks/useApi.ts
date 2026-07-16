@@ -14,6 +14,8 @@ export const qk = {
   attachments: (ticketId: string) => ["attachments", ticketId] as const,
   activity: (limit: number) => ["activity", limit] as const,
   stats: (userId: string) => ["stats", userId] as const,
+  notifications: (unreadOnly = false) => ["notifications", unreadOnly] as const,
+  unreadNotificationCount: ["notifications", "unread-count"] as const,
 };
 
 // ---------- Auth ----------
@@ -116,5 +118,51 @@ export const useDashboardStats = (userId: string, role: Parameters<typeof api.da
 
 export const useRecentActivity = (limit = 10) =>
   useQuery({ queryKey: qk.activity(limit), queryFn: () => api.recentActivity(limit) });
+
+// ---------- Notifications ----------
+export const useNotifications = (unreadOnly = false) =>
+  useQuery({ queryKey: qk.notifications(unreadOnly), queryFn: () => api.listNotifications(unreadOnly) });
+
+export const useUnreadNotificationCount = () =>
+  useQuery({
+    queryKey: qk.unreadNotificationCount,
+    queryFn: () => api.getUnreadNotificationCount(),
+    refetchInterval: 60_000,
+  });
+
+export const useMarkNotificationRead = () => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => api.markNotificationRead(id),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["notifications"] }),
+  });
+};
+
+export const useMarkAllNotificationsRead = () => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: () => api.markAllNotificationsRead(),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["notifications"] }),
+    onError: (e: Error) => toast.error(e.message || "Couldn't mark notifications as read"),
+  });
+};
+
+export const useDeleteNotification = () => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => api.deleteNotification(id),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["notifications"] }),
+    onError: (e: Error) => toast.error(e.message || "Couldn't delete notification"),
+  });
+};
+
+export const useDeleteAllReadNotifications = () => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: () => api.deleteAllReadNotifications(),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["notifications"] }),
+    onError: (e: Error) => toast.error(e.message || "Couldn't clear read notifications"),
+  });
+};
 
 export type { TicketStatus };

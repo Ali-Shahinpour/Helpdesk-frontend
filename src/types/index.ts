@@ -69,6 +69,19 @@ export interface ActivityEvent {
   createdAt: string;
 }
 
+export type NotificationType = "TicketCreated" | "TicketUpdated" | "TicketAssigned" | "CommentAdded" | string;
+
+export interface Notification {
+  id: string;
+  userId: string;
+  type: NotificationType;
+  title: string;
+  body?: string | null;
+  ticketId?: string | null;
+  isRead: boolean;
+  createdAt: string;
+}
+
 export interface AuthResponse {
   accessToken: string;
   refreshToken: string;
